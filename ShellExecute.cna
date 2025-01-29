@@ -1,0 +1,51 @@
+# ShellExecute - Execute a command via BOF
+# Author: dmcxblue
+# Description: This Aggressor script runs a specified binary using NtCreateProcess
+
+beacon_command_register(
+    "ShellExecute",
+    "Executes a specified command using the ShellExecute BOF.",
+    "Usage: ShellExecute <command>\n\n".
+    "Examples:\n".
+    "  ShellExecute calc\n".
+    "  ShellExecute \"ipconfig /all\"\n".
+    "  ShellExecute \"C:\\Program Files\\SomeApp.exe\""
+);
+
+alias ShellExecute {
+    local('$barch $handle $data $args $bof_file');
+
+    # Get the architecture of the session
+    $barch  = barch($1);
+
+    # Determine the BOF file path
+    $bof_file = "ShellExecute. $+ $barch $+ .o";
+
+    # Read in the right BOF file
+    $handle = openf(script_resource($bof_file));
+    $data   = readb($handle, -1);
+    closef($handle);
+
+    # Ensure command is provided
+    if ($2 eq "") {
+        berror("Usage: ShellExecute <command>");
+        return;
+    }
+
+    # Prepend NT path prefix if not already included
+    if ($2 !ismatch "^\\\\\\\\\?\\\\") {
+        $cmd = "\\??\\" . $2;
+    } else {
+        $cmd = $2;
+    }
+
+    # Ensure correct null-terminated string handling
+    $cmd .= "\x00";
+
+    # Use "z" (ASCII) for correct argument packing
+    $args = bof_pack($1, "z", $cmd);
+
+    # Execute the BOF
+    btask($1, "Executing ShellExecute BOF: $2");
+    beacon_inline_execute($1, $data, "go", $args);
+}
