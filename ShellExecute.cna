@@ -6,9 +6,7 @@ beacon_command_register(
     "ShellExecute",
     "Executes a specified command using the ShellExecute BOF.",
     "Usage: ShellExecute <command>\n\n".
-    "Examples:\n".
-    "  ShellExecute calc\n".
-    "  ShellExecute \"ipconfig /all\"\n".
+    "Example:\n".
     "  ShellExecute \"C:\\Program Files\\SomeApp.exe\""
 );
 
